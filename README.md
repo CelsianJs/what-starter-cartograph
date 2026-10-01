@@ -10,6 +10,7 @@ Read the detailed implementation guide in [`BUILD.md`](./BUILD.md), or run the a
 
 - Node.js 22
 - npm 10+
+- After `npm ci`, install Playwright Chromium for smoke verification: `npx playwright install chromium`
 
 ## Run locally
 
@@ -30,6 +31,8 @@ npm run smoke
 
 - `/tmp/cartograph-desktop.png`
 - `/tmp/cartograph-mobile.png`
+
+On minimal Linux CI images that do not already include browser system libraries, use `npx playwright install --with-deps chromium` instead.
 
 ## Deploy to Vura
 
