@@ -24,6 +24,7 @@ Planned public source: `https://github.com/CelsianJs/what-starter-cartograph`
 | Router | `src/routes.js` | Programmatic What router routes cover product detail, cart, receipt, build notes, and catch-all 404. |
 | Serverless API | `src/api/quote.js` | Function code imports only shared data and bounded JSON helpers; it does not import DOM/client state. |
 | Vura package | `scripts/build-vura.mjs` | The build writes `dist/static`, bundles `dist/functions/api_quote/index.js`, and writes `dist/manifest.json`. |
+| Vura config | `vura.json` | Header catch-alls use Vura's `(.*)` pattern, not shell-style `*`, and concrete static aliases avoid unsupported top-level rewrites. |
 
 ## Actual implementation notes
 
@@ -35,9 +36,12 @@ Router and direct routes: `/products/:slug` renders through the client router, b
 
 Serverless boundary: `src/api/bounded-json.js` counts bytes from a stream, cancels oversized bodies, and rejects malformed UTF-8/JSON. `src/api/quote.js` validates known product slugs, clamps quantities, returns 422 for stock overflow or empty baskets, and never mutates inventory.
 
+Deployment package boundary: `vura.json` is intentionally small and schema-safe. The `/api/(.*)` and `/products/(.*)` headers use Vura's route matcher syntax; shell-style `*` globs are rejected by the platform. The build already writes concrete static aliases and `404.html`, so no top-level rewrite rule is needed. `scripts/build-vura.mjs` also writes `dist/functions/package.json` with `{ "type": "module" }` and validates required manifest fields (`filePath`, `config`, route flags, `timestamp`, and the non-empty serverless API mapping) before upload.
+
 ## Issues encountered and fixes
 
 - Vura output shape: existing starters used more than one output convention. Cartograph follows the newer serverless-friendly layout from Tempo: `dist/static`, `dist/functions/api_quote`, explicit `dist/manifest.json`.
+- Vura config upload: the first real-host upload failed before provisioning because `vura.json` used shell-style `*` header globs and an unsupported top-level `rewrites` key. The fix changed catch-alls to `(.*)`, removed the rewrite, and added build-time manifest/package checks so config-shape drift fails locally.
 - Static aliases: hand-maintaining product routes would drift. The build script now imports the same product array used by the UI and writes aliases from it.
 - Storage resilience: localStorage can be corrupt or denied. The state layer sanitizes loaded data and falls back to memory for session-only edits.
 - npm peer resolution: npm 10.9.9 hit an arborist `edgesOut` error around Vitest optional browser peers without legacy peer resolution. The local `.npmrc` sets `legacy-peer-deps=true`, and `npm ci` verifies the lockfile.
@@ -45,7 +49,7 @@ Serverless boundary: `src/api/bounded-json.js` counts bytes from a stream, cance
 ## Test proof
 
 - `npm ci && npm test` passed: 5 Vitest checks for quote totals, over-stock rejection, malformed JSON, oversized streamed bodies, and unknown product handling.
-- `npm run build` passed: Vite bundle plus 12 Vura pages and `/api/quote`.
+- `npm run build` passed: Vite bundle plus 12 Vura pages, `/api/quote`, required manifest fields, and `dist/functions/package.json`.
 - `npm run smoke` passed: fresh root render, product cards, cart quote entrypoint copy, all primary nav links with browser back, direct product route, add-to-cart, `/api/quote`, local receipt, real 404, desktop and mobile full-page screenshots.
 - Screenshots: `/tmp/cartograph-desktop.png`, `/tmp/cartograph-mobile.png`.
 

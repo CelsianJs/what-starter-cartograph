@@ -1,13 +1,13 @@
 {
   "headers": [
     {
-      "source": "/api/*",
+      "source": "/api/(.*)",
       "headers": {
         "Cache-Control": "private, no-store"
       }
     },
     {
-      "source": "/products/*",
+      "source": "/products/(.*)",
       "headers": {
         "Cache-Control": "public, max-age=120, stale-while-revalidate=600"
       }
@@ -23,12 +23,6 @@
       "headers": {
         "Cache-Control": "public, max-age=600"
       }
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/404",
-      "destination": "/404.html"
     }
   ]
 }
