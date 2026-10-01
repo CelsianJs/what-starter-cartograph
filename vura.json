@@ -1,0 +1,34 @@
+{
+  "headers": [
+    {
+      "source": "/api/*",
+      "headers": {
+        "Cache-Control": "private, no-store"
+      }
+    },
+    {
+      "source": "/products/*",
+      "headers": {
+        "Cache-Control": "public, max-age=120, stale-while-revalidate=600"
+      }
+    },
+    {
+      "source": "/cart",
+      "headers": {
+        "Cache-Control": "private, no-store"
+      }
+    },
+    {
+      "source": "/build",
+      "headers": {
+        "Cache-Control": "public, max-age=600"
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/404",
+      "destination": "/404.html"
+    }
+  ]
+}

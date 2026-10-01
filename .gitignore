@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+.env*
+!.env.example
+.vura/
+.omx/
+playwright-report/
+test-results/
+test-artifacts/
+output/playwright/
+*.tsbuildinfo
