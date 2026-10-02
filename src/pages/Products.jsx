@@ -8,7 +8,7 @@ export default function Products() {
       <div class="page-head">
         <p class="eyebrow">Catalog</p>
         <h1>Choose a kit by route, weather, and load.</h1>
-        <p>Filters are signal-driven, details are routeable, and every product has a generated static alias for direct deployment.</p>
+        <p>Filter the real demo catalogue by route, weather, and load, then check field stock before saving a local receipt.</p>
       </div>
       <div class="filter-rig" aria-label="Catalog filters">
         <label><span>Search</span><input value={query()} onInput={(event) => query(event.target.value)} placeholder="pack, tarp, lantern..." /></label>

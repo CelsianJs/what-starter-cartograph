@@ -59,7 +59,7 @@ export default function Cart() {
       <div class="page-head">
         <p class="eyebrow">Basket ledger</p>
         <h1>Validate the kit before writing a local receipt.</h1>
-        <p>Quantities live in What signals. The quote button posts a bounded payload to a Vura-shaped function and checks stock limits.</p>
+        <p>The quote button checks a bounded basket against demo field stock before saving a local receipt.</p>
       </div>
       {cartLines().length === 0 ? (
         <div class="empty"><h2>Your kit is empty.</h2><p>Pick a product before requesting a quote.</p><Link class="button" href="/products">Open products</Link></div>
@@ -69,7 +69,7 @@ export default function Cart() {
             {cartLines().map(({ product }) => <CartLine key={product.slug} product={product} />)}
           </div>
           <aside class="quote-panel" aria-live="polite">
-            <p class="eyebrow">Serverless quote</p>
+            <p class="eyebrow">Field stock quote</p>
             <strong>{money(cartSubtotal())}</strong>
             <p>{quoteStatus()}</p>
             {quote()?.lines?.length ? <p>{quote().quoteId}: total {money(quote().total)} with freight and demo tax.</p> : null}
