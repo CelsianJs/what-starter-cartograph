@@ -1,6 +1,57 @@
 import { Link } from 'what-framework/router';
 import { money } from '../data/products.js';
-import { cartLines, cartSubtotal, quote, quoteStatus, requestQuote, setQuantity, writeReceipt } from '../state/cart.js';
+import { cart, cartLines, cartSubtotal, quote, quoteStatus, requestQuote, setQuantity, writeReceipt } from '../state/cart.js';
+
+function parseQuantity(value) {
+  if (!/^\d+$/.test(value)) return null;
+  const next = Number(value);
+  if (!Number.isSafeInteger(next) || next < 1 || next > 20) return null;
+  return next;
+}
+
+function updateQuantity(slug, value, quantity) {
+  const parsed = parseQuantity(value);
+  if (parsed && parsed !== quantity) setQuantity(slug, parsed);
+}
+
+function commitQuantity(event, slug, quantity) {
+  const parsed = parseQuantity(event.currentTarget.value);
+  if (parsed) setQuantity(slug, parsed);
+  else event.currentTarget.value = String(quantity);
+}
+
+function CartLine({ product }) {
+  const quantity = () => cart()[product.slug] || 0;
+  return (
+    <article class="cart-line" key={product.slug}>
+      <div><h2>{product.name}</h2><p>{money(product.price)} / {product.stock} available</p></div>
+      <div class="quantity-editor">
+        <label>
+          <span>Qty</span>
+          <input
+            aria-label={`${product.name} quantity`}
+            aria-describedby={`${product.slug}-quantity-help`}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            defaultValue={quantity()}
+            onInput={(event) => updateQuantity(product.slug, event.target.value, quantity())}
+            onChange={(event) => updateQuantity(product.slug, event.target.value, quantity())}
+            onBlur={(event) => commitQuantity(event, product.slug, quantity())}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.currentTarget.blur();
+              }
+            }}
+          />
+        </label>
+        <small id={`${product.slug}-quantity-help`}>Enter 1–20. Blank edits keep the current kit line until blur.</small>
+        <button class="link-button" onClick={() => setQuantity(product.slug, 0)}>Remove</button>
+      </div>
+      <strong>{money(product.price * quantity())}</strong>
+    </article>
+  );
+}
 
 export default function Cart() {
   return (
@@ -15,13 +66,7 @@ export default function Cart() {
       ) : (
         <div class="cart-layout">
           <div class="cart-lines">
-            {cartLines().map(({ product, quantity }) => (
-              <article class="cart-line">
-                <div><h2>{product.name}</h2><p>{money(product.price)} / {product.stock} available</p></div>
-                <label><span>Qty</span><input aria-label={`${product.name} quantity`} type="number" min="0" max="20" value={quantity} onInput={(event) => setQuantity(product.slug, event.target.value)} /></label>
-                <strong>{money(product.price * quantity)}</strong>
-              </article>
-            ))}
+            {cartLines().map(({ product }) => <CartLine key={product.slug} product={product} />)}
           </div>
           <aside class="quote-panel" aria-live="polite">
             <p class="eyebrow">Serverless quote</p>

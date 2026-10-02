@@ -93,7 +93,9 @@ p { line-height: 1.6; }
   cursor: pointer;
 }
 .button.ghost { background: transparent; color: var(--canvas); border-color: var(--line); }
+.link-button { border: 0; background: transparent; color: var(--brass); padding: 0; text-decoration: underline; font: 900 .76rem ui-sans-serif, system-ui; text-transform: uppercase; letter-spacing: .1em; cursor: pointer; }
 .button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+.link-button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
 .manifest-panel { position: relative; padding: 1.2rem; min-height: 320px; display: grid; align-content: end; overflow: hidden; }
 .manifest-panel::before {
   content: "";
@@ -174,6 +176,9 @@ dd { margin: 0; font-size: 1.15rem; }
   padding: 1rem;
 }
 .cart-line p { margin: 0; color: var(--muted); }
+.quantity-editor { display: grid; gap: .35rem; }
+.quantity-editor small { color: var(--brass); font: 800 .68rem ui-sans-serif, system-ui; line-height: 1.35; }
+.quantity-editor input[aria-invalid="true"] { border-color: var(--orange); }
 .quote-panel { padding: 1rem; display: grid; gap: .8rem; position: sticky; top: 1rem; }
 .quote-panel strong { font-size: 2.4rem; letter-spacing: -.06em; }
 .receipt { max-width: 720px; padding: 1rem; }

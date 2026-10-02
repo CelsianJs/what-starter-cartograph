@@ -73,6 +73,7 @@ async function runFlow(name, contextOptions) {
   await page.getByRole('heading', { name: 'Basalt Frame Pack' }).waitFor();
   await page.getByRole('button', { name: 'Add to kit' }).click();
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Cart', exact: true }).click();
+  await assertQuantityReplacement(page);
   await page.getByRole('button', { name: 'Check field stock' }).click();
   await page.getByText(/Quote CQ-/).waitFor();
   await page.getByRole('button', { name: 'Write local receipt' }).click();
@@ -82,6 +83,42 @@ async function runFlow(name, contextOptions) {
   await assertHome(page);
   await waitForVisualRest(page);
   await context.close();
+}
+
+async function assertQuantityReplacement(page) {
+  const row = page.locator('.cart-line').filter({ hasText: 'Basalt Frame Pack' });
+  await row.waitFor();
+  const input = row.getByLabel('Basalt Frame Pack quantity');
+  const handle = await input.elementHandle();
+  if (!handle) throw new Error('Expected Basalt quantity input handle.');
+  await input.click();
+  await page.keyboard.press('Meta+A');
+  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
+    await page.keyboard.press('Control+A');
+  }
+  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
+    await input.click({ clickCount: 3 });
+  }
+  await page.keyboard.press('Backspace');
+  await row.getByText('Blank edits keep the current kit line until blur.').waitFor();
+  await page.getByRole('heading', { name: 'Basalt Frame Pack' }).waitFor();
+  const emptyStillFocused = await handle.evaluate((node) => document.activeElement === node && node.value === '');
+  if (!emptyStillFocused) throw new Error('Empty intermediate quantity should keep the same input focused.');
+  await page.keyboard.type('12');
+  await row.getByText('$2,976').waitFor();
+  const replacementWorked = await handle.evaluate((node) => document.activeElement === node && node.value === '12');
+  if (!replacementWorked) throw new Error('Typing replacement quantity should keep focus on the same input node with value 12.');
+  await page.waitForFunction(() => {
+    const saved = JSON.parse(localStorage.getItem('what-starter-cartograph-v1') || '{}');
+    return saved?.cart?.['basalt-frame-pack'] === 12;
+  });
+  await page.keyboard.press('Meta+A');
+  await page.keyboard.type('2');
+  await row.getByText('$496').waitFor();
+  await page.waitForFunction(() => {
+    const saved = JSON.parse(localStorage.getItem('what-starter-cartograph-v1') || '{}');
+    return saved?.cart?.['basalt-frame-pack'] === 2;
+  });
 }
 
 try {

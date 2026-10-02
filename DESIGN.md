@@ -64,6 +64,7 @@
 - Success: Quote summary and local receipt confirmation are explicit.
 - Disabled: Quote disabled when cart empty or while checking.
 - Offline/slow network: Quote failure keeps local cart and explains retry.
+- Quantity editing: select-all/backspace is an intermediate text edit, not a remove action. Keep the SKU row mounted, show helper copy, commit valid 1–20 values live, and make removal an explicit button.
 
 ## Content voice
 - Tone: Competent, tactile, no hype.
@@ -75,7 +76,7 @@
 - Design-token constraints: No external assets; SVGs generated in JSX/data.
 - Performance constraints: Small static bundle, bounded API body reader, generated static aliases.
 - Compatibility constraints: Node 22, npm ci, Vura function bundle uses browser platform ESM.
-- Test/screenshot expectations: Vitest unit/API/storage tests plus Playwright smoke screenshots for desktop and mobile. Body gradients must not tile on short pages; product-card titles align across a three-card row; detail features render as manifest lines.
+- Test/screenshot expectations: Vitest unit/API/storage tests plus Playwright smoke screenshots for desktop and mobile. Body gradients must not tile on short pages; product-card titles align across a three-card row; detail features render as manifest lines; browser smoke must prove keyboard quantity replacement keeps the same focused input node and persists the replacement value.
 
 ## Open questions
 - [ ] Which real ecommerce backend should production docs recommend first / owner: platform team / impact: future integration guide.
