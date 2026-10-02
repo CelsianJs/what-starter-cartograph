@@ -27,9 +27,13 @@ async function assertHome(page) {
   await page.getByRole('heading', { name: 'Moraine Shell' }).waitFor();
   await page.getByRole('heading', { name: 'Signal Stove Kit' }).waitFor();
   await page.getByText('Current kit').waitFor();
-  await page.getByText(new RegExp('Quote validation runs through `/api/quote`')).waitFor();
+  await page.getByText('Basalt Frame Pack · Alpine').waitFor();
+  await page.getByText('Quotes are checked before your local receipt is written.').waitFor();
+  if (await page.getByText(/api\/quote/).count()) throw new Error('Product-facing home copy should not expose /api/quote.');
   await page.getByRole('link', { name: 'Survey products' }).waitFor();
   await page.getByRole('link', { name: 'Review kit' }).waitFor();
+  const backgroundRepeat = await page.evaluate(() => getComputedStyle(document.body).backgroundRepeat);
+  if (!backgroundRepeat.includes('no-repeat')) throw new Error(`Expected no-repeat body background, got ${backgroundRepeat}`);
 }
 
 async function assertNavAndBack(page) {

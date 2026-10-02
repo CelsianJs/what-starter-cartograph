@@ -5,13 +5,16 @@ import { ProductCard } from '../components/ProductCard.jsx';
 
 export default function Home() {
   const featured = products.slice(0, 3);
+  const manifestLines = cartCount() === 0
+    ? featured.map((product) => `${product.name} · ${product.terrain}`)
+    : [`${cartCount()} selected`, `${money(cartSubtotal())} subtotal`, 'receipt waits for stock check'];
   return (
     <section class="page-enter">
       <div class="hero">
         <div>
           <p class="eyebrow">Field-ready commerce</p>
           <h1>Equipment that reads like a manifest, not a mall.</h1>
-          <p>Cartograph is a What Framework storefront starter with static catalog routes, reactive basket state, and a bounded Vura serverless quote check.</p>
+          <p>Cartograph is a field storefront for surveying gear, checking stock, and writing an honest local receipt before a real checkout exists.</p>
           <div class="actions">
             <Link class="button" href="/products">Survey products</Link>
             <Link class="button ghost" href="/cart">Review kit</Link>
@@ -22,7 +25,10 @@ export default function Home() {
           <p class="eyebrow">Current kit</p>
           <strong>{cartCount()} items</strong>
           <span>{money(cartSubtotal())} subtotal</span>
-          <small>Quote validation runs through `/api/quote` before a local receipt is written.</small>
+          <ul class="manifest-lines">
+            {manifestLines.map((line) => <li>{line}</li>)}
+          </ul>
+          <small>Quotes are checked before your local receipt is written.</small>
         </aside>
       </div>
       <div class="section-head">

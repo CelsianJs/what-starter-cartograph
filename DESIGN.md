@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-01
+- Last refreshed: 2026-10-02
 - Primary product surfaces: Field-gear storefront, product detail pages, cart/receipt flow, build guide, serverless quote API.
 - Evidence reviewed: `what-starter-gather`, `what-starter-harbor`, `what-starter-tempo`, What router/core package docs.
 
@@ -68,14 +68,14 @@
 ## Content voice
 - Tone: Competent, tactile, no hype.
 - Terminology: Kit, field stock, depot, manifest, local receipt.
-- Microcopy rules: Be honest about demo boundaries outside `/build` when it affects user trust.
+- Microcopy rules: Be honest about demo boundaries outside `/build` when it affects user trust. Keep endpoint names and implementation mechanics in `/build`, not in the product-facing commerce panels.
 
 ## Implementation constraints
 - Framework/styling system: What Framework 0.13.10, Vite, Vura CLI 0.3.0, CSS modules by convention in one stylesheet.
 - Design-token constraints: No external assets; SVGs generated in JSX/data.
 - Performance constraints: Small static bundle, bounded API body reader, generated static aliases.
 - Compatibility constraints: Node 22, npm ci, Vura function bundle uses browser platform ESM.
-- Test/screenshot expectations: Vitest unit/API/storage tests plus Playwright smoke screenshots for desktop and mobile.
+- Test/screenshot expectations: Vitest unit/API/storage tests plus Playwright smoke screenshots for desktop and mobile. Body gradients must not tile on short pages; product-card titles align across a three-card row; detail features render as manifest lines.
 
 ## Open questions
 - [ ] Which real ecommerce backend should production docs recommend first / owner: platform team / impact: future integration guide.

@@ -36,6 +36,8 @@ Router and direct routes: `/products/:slug` renders through the client router, b
 
 Serverless boundary: `src/api/bounded-json.js` counts bytes from a stream, cancels oversized bodies, and rejects malformed UTF-8/JSON. `src/api/quote.js` validates known product slugs, clamps quantities, returns 422 for stock overflow or empty baskets, and never mutates inventory.
 
+Design review repair: product-facing panels no longer print raw endpoint names. The home manifest says “Quotes are checked before your local receipt is written,” while `/build` keeps `/api/quote` for agents. The empty kit panel now renders featured product manifest lines from the real catalog data, product-card headings reserve enough height for two-line names, detail features use ticked manifest rows, and the body gradient is `min-height:100vh` plus `no-repeat` so short pages do not tile the glow.
+
 Deployment package boundary: `vura.json` is intentionally small and schema-safe. The `/api/(.*)` and `/products/(.*)` headers use Vura's route matcher syntax; shell-style `*` globs are rejected by the platform. The build already writes concrete static aliases and `404.html`, so no top-level rewrite rule is needed. `scripts/build-vura.mjs` also writes `dist/functions/package.json` with `{ "type": "module" }` and validates required manifest fields (`filePath`, `config`, route flags, `timestamp`, and the non-empty serverless API mapping) before upload.
 
 ## Issues encountered and fixes
