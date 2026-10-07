@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-02
+- Last refreshed: 2026-10-07
 - Primary product surfaces: Field-gear storefront, product detail pages, cart/receipt flow, build guide, serverless quote API.
 - Evidence reviewed: `what-starter-gather`, `what-starter-harbor`, `what-starter-tempo`, What router/core package docs.
 
@@ -77,6 +77,11 @@
 - Performance constraints: Small static bundle, bounded API body reader, generated static aliases.
 - Compatibility constraints: Node 22, npm ci, Vura function bundle uses browser platform ESM.
 - Test/screenshot expectations: Vitest unit/API/storage tests plus Playwright smoke screenshots for desktop and mobile. Body gradients must not tile on short pages; product-card titles align across a three-card row; detail features render as manifest lines; browser smoke must prove keyboard quantity replacement keeps the same focused input node and persists the replacement value.
+
+## Quote ownership and hierarchy
+- A quote applies only to its submitted sorted basket snapshot. Pending checks cannot repeat; stale responses never authorize a receipt.
+- Receipt action remains disabled until the current quote is successful. Quantity drafts stay editable while checking so changes can safely invalidate the response.
+- Home/cart heading sizing is scoped to reveal the catalog/validation workflow sooner. Clipped panels, metal/canvas colors, topographic marks and field typography stay intact.
 
 ## Open questions
 - [ ] Which real ecommerce backend should production docs recommend first / owner: platform team / impact: future integration guide.

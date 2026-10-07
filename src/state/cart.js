@@ -53,6 +53,8 @@ export const cart = signal(initial.cart, 'cartograph.cart');
 export const receipt = signal(initial.receipt, 'cartograph.receipt');
 export const quoteStatus = signal('Ready for field-stock check.', 'cartograph.quoteStatus');
 export const quote = signal(null, 'cartograph.quote');
+export const quotePending = signal(false, 'cartograph.quotePending');
+const quotedBasket = signal(null);
 export const storageNotice = signal('Basket is saved locally in this browser.', 'cartograph.storageNotice');
 
 export const filteredProducts = computed(() => {
@@ -73,11 +75,14 @@ export const cartLines = computed(() => Object.entries(cart())
 
 export const cartCount = computed(() => cartLines().reduce((sum, line) => sum + line.quantity, 0));
 export const cartSubtotal = computed(() => cartLines().reduce((sum, line) => sum + (line.product.price * line.quantity), 0));
+const basketKey = computed(() => JSON.stringify(Object.entries(cart()).sort(([a], [b]) => a.localeCompare(b))));
+export const canWriteReceipt = computed(() => !quotePending() && quote()?.ok === true && quotedBasket() === basketKey());
 
 export function setQuantity(slug, quantity) {
   const product = findProduct(slug);
   if (!product) return;
   const value = Math.max(0, Math.min(20, Math.round(Number(quantity) || 0)));
+  if ((cart()[slug] || 0) === value) return;
   cart((current) => {
     const next = { ...current };
     if (value <= 0) delete next[slug];
@@ -85,6 +90,7 @@ export function setQuantity(slug, quantity) {
     return next;
   });
   quote(null);
+  quotedBasket(null);
   quoteStatus('Basket changed. Recheck field stock before writing a receipt.');
 }
 
@@ -100,30 +106,45 @@ export function clearCart() {
 }
 
 export async function requestQuote(fetcher = fetch) {
+  if (quotePending()) return null;
   if (cartLines().length === 0) {
     quoteStatus('Add gear before requesting a field-stock quote.');
     return null;
   }
+  const key = basketKey();
+  const items = cartLines().map((line) => ({ slug: line.product.slug, quantity: line.quantity }));
+  quotePending(true);
+  quote(null);
+  quotedBasket(null);
   quoteStatus('Checking field stock...');
   try {
     const response = await fetcher('/api/quote', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ items: cartLines().map((line) => ({ slug: line.product.slug, quantity: line.quantity })) }),
+      body: JSON.stringify({ items }),
     });
     const body = await response.json();
+    if (key !== basketKey()) {
+      quoteStatus('Basket changed during the check. Request a new field-stock quote.');
+      return null;
+    }
     quote(body);
+    quotedBasket(body.ok ? key : null);
     quoteStatus(body.ok ? `Quote ${body.quoteId} is ready.` : body.errors.join(' '));
     return body;
   } catch {
+    quote(null);
+    quotedBasket(null);
     quoteStatus('Quote service is unreachable. The local basket is preserved so you can retry.');
     return null;
+  } finally {
+    quotePending(false);
   }
 }
 
 export function writeReceipt() {
   const current = quote();
-  if (!current?.ok) {
+  if (!canWriteReceipt()) {
     quoteStatus('Request a successful quote before writing a local receipt.');
     return null;
   }

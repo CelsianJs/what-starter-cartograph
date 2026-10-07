@@ -1,6 +1,6 @@
 import { Link } from 'what-framework/router';
 import { money } from '../data/products.js';
-import { cart, cartLines, cartSubtotal, quote, quoteStatus, requestQuote, setQuantity, writeReceipt } from '../state/cart.js';
+import { canWriteReceipt, cart, cartLines, cartSubtotal, quote, quotePending, quoteStatus, requestQuote, setQuantity, writeReceipt } from '../state/cart.js';
 
 function parseQuantity(value) {
   if (!/^\d+$/.test(value)) return null;
@@ -55,7 +55,7 @@ function CartLine({ product }) {
 
 export default function Cart() {
   return (
-    <section class="page-enter">
+    <section class="page-enter cart-page">
       <div class="page-head">
         <p class="eyebrow">Basket ledger</p>
         <h1>Validate the kit before writing a local receipt.</h1>
@@ -73,8 +73,8 @@ export default function Cart() {
             <strong>{money(cartSubtotal())}</strong>
             <p>{quoteStatus()}</p>
             {quote()?.lines?.length ? <p>{quote().quoteId}: total {money(quote().total)} with freight and demo tax.</p> : null}
-            <button class="button" onClick={() => requestQuote()}>Check field stock</button>
-            <button class="button ghost" onClick={writeReceipt}>Write local receipt</button>
+            <button class="button" disabled={() => quotePending()} onClick={() => requestQuote()}>{() => quotePending() ? 'Checking field stock...' : 'Check field stock'}</button>
+            <button class="button ghost" disabled={() => !canWriteReceipt()} onClick={writeReceipt}>Write local receipt</button>
             <Link class="text-link" href="/receipt">View receipt</Link>
           </aside>
         </div>
