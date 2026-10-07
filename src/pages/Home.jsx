@@ -5,7 +5,7 @@ import { ProductCard } from '../components/ProductCard.jsx';
 
 export default function Home() {
   const featured = products.slice(0, 3);
-  const manifestLines = cartCount() === 0
+  const manifestLines = () => cartCount() === 0
     ? featured.map((product) => `${product.name} · ${product.terrain}`)
     : [`${cartCount()} selected`, `${money(cartSubtotal())} subtotal`, 'receipt waits for stock check'];
   return (
@@ -26,7 +26,7 @@ export default function Home() {
           <strong>{cartCount()} items</strong>
           <span>{money(cartSubtotal())} subtotal</span>
           <ul class="manifest-lines">
-            {manifestLines.map((line) => <li>{line}</li>)}
+            {() => manifestLines().map((line) => <li>{line}</li>)}
           </ul>
           <small>Quotes are checked before your local receipt is written.</small>
         </aside>

@@ -1,5 +1,5 @@
 import { mkdir } from 'node:fs/promises';
-import { chromium, devices } from 'playwright';
+import { chromium } from 'playwright';
 import { collectChildLogs, spawnNodePreview, starterRoot, stopOwnedProcess, waitForOwnedReadiness } from './smoke-harness.mjs';
 
 const port = 4181;
@@ -22,6 +22,7 @@ async function waitForVisualRest(page) {
 }
 
 async function assertHome(page) {
+  await assertNoOverflow(page);
   await page.getByRole('heading', { name: /Equipment that reads like a manifest/i }).waitFor();
   await page.getByRole('heading', { name: 'Basalt Frame Pack' }).waitFor();
   await page.getByRole('heading', { name: 'Moraine Shell' }).waitFor();
@@ -47,11 +48,18 @@ async function assertNavAndBack(page) {
   for (const [label, heading] of checks) {
     await nav.getByRole('link', { name: label, exact: true }).click();
     await page.getByRole('heading', { name: heading }).waitFor();
+    await assertNoOverflow(page);
     await waitForVisualRest(page);
     await page.goBack();
     await assertHome(page);
     await waitForVisualRest(page);
   }
+}
+
+async function assertNoOverflow(page) {
+  const viewportWidth = page.viewportSize().width;
+  const widths = await page.evaluate(() => [document.documentElement.scrollWidth, document.body.scrollWidth]);
+  if (widths.some((width) => width > viewportWidth)) throw new Error(`Horizontal overflow on ${page.url()}: ${widths} / ${viewportWidth}`);
 }
 
 async function runFlow(name, contextOptions) {
@@ -74,13 +82,48 @@ async function runFlow(name, contextOptions) {
   await page.getByRole('button', { name: 'Add to kit' }).click();
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Cart', exact: true }).click();
   await assertQuantityReplacement(page);
+  let releaseQuote;
+  await page.route('**/api/quote', async (route) => {
+    await new Promise((resolve) => { releaseQuote = resolve; });
+    await route.fulfill({ json: { ok: true, quoteId: 'stale-quote', lines: [], total: 294 } });
+  });
+  await page.getByRole('button', { name: 'Check field stock' }).click();
+  await page.waitForFunction(() => document.querySelector('.quote-panel button')?.disabled);
+  await page.getByLabel('Basalt Frame Pack quantity').fill('3');
+  releaseQuote();
+  await page.getByText('Basket changed during the check. Request a new field-stock quote.').waitFor();
+  if (!(await page.getByRole('button', { name: 'Write local receipt' }).isDisabled())) throw new Error('Stale quote must not enable a receipt.');
+  await page.unroute('**/api/quote');
   await page.getByRole('button', { name: 'Check field stock' }).click();
   await page.getByText(/Quote CQ-/).waitFor();
   await page.getByRole('button', { name: 'Write local receipt' }).click();
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Receipt', exact: true }).click();
   await page.getByText(/No payment was collected/).waitFor();
+  await assertNoOverflow(page);
+  await waitForVisualRest(page);
+  await page.screenshot({ path: `/tmp/cartograph-receipt-${name}-filled.png`, fullPage: true });
+  const receiptId = await page.getByRole('heading', { level: 1 }).innerText();
+  await page.getByRole('button', { name: 'Reset receipt' }).click();
+  await page.waitForFunction(() => document.body.innerText.includes('No local receipt yet.'), undefined, { timeout: 3000 });
+  if (await page.getByRole('heading', { name: receiptId, exact: true }).count()) throw new Error('Reset receipt must remove the former receipt immediately.');
+  await page.getByRole('link', { name: 'Go to cart' }).waitFor();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.getByRole('navigation', { name: 'Primary' }).waitFor();
+  await waitForVisualRest(page);
+  await page.screenshot({ path: `/tmp/cartograph-receipt-${name}-empty.png`, fullPage: true });
+  await page.waitForFunction(() => JSON.parse(localStorage.getItem('what-starter-cartograph-v1') || '{}').receipt === null);
+  await page.getByRole('link', { name: 'Go to cart' }).click();
+  await page.getByRole('heading', { name: /Validate the kit before writing/i }).waitFor();
+  await waitForVisualRest(page);
+  await page.goBack();
+  await page.getByRole('heading', { name: 'No local receipt yet.', exact: true }).waitFor();
+  await page.reload();
+  await page.getByRole('heading', { name: 'No local receipt yet.', exact: true }).waitFor();
+  await assertNoOverflow(page);
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Field desk', exact: true }).click();
   await assertHome(page);
+  await page.getByRole('button', { name: 'Add to kit' }).first().click();
+  await page.locator('.manifest-lines').getByText('1 selected', { exact: true }).waitFor();
   await waitForVisualRest(page);
   await context.close();
 }
@@ -129,8 +172,8 @@ try {
   });
   await mkdir('/tmp', { recursive: true });
   var browser = await chromium.launch();
-  await runFlow('desktop', { viewport: { width: 1360, height: 920 } });
-  await runFlow('mobile', { ...devices['iPhone 15'] });
+  await runFlow('desktop', { viewport: { width: 1440, height: 1000 } });
+  await runFlow('mobile', { viewport: { width: 390, height: 844 }, isMobile: true });
   const page = await browser.newPage();
   const notFound = await page.goto(`http://127.0.0.1:${port}/lost-pass`);
   if (notFound.status() !== 404) throw new Error(`Expected 404, got ${notFound.status()}`);

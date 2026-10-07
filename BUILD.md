@@ -59,7 +59,18 @@ Deployment package boundary: `vura.json` is intentionally small and schema-safe.
 
 Visual QA note: an earlier smoke captured after a subflow and could miss a blank home body. The later dim/ghost screenshot was diagnosed as capture timing after browser back: DOM inspection showed one header/brand, at-rest body/main opacity `1`, filter `none`, and finite `.page-enter` plus View Transition animations still running during the bad capture. The current smoke waits for finite animations to finish, ignores decorative infinite loops, asserts meaningful root content before any subroute, and writes full-page home screenshots, so a nav-only or mid-transition render fails.
 
+## Quote snapshot and product hierarchy repair
+
+Regression-first tests reproduced a late quote being accepted after its basket changed. `basketKey` fingerprints sorted cart entries; `requestQuote` captures the key and submitted lines, blocks duplicate pending requests, and discards mismatched responses. `canWriteReceipt` requires the current successful quote and no pending check. Quantity blur no longer clears a quote when the canonical value is unchanged, preserving the native blank/replacement/focus behavior.
+
+Scoped home/cart heading sizing preserves the clipped field-manifest identity while bringing equipment and quote controls forward. Smooth path: use one product dataset, derive totals, validate a submitted snapshot, and test delayed responses plus real keyboard quantity replacement before introducing authoritative orders. Unit and browser smoke regressions cover the stale basket branch.
+
+
 ## Known limitations
+### Receipt reset continuity
+
+The receipt page used to read `receipt()` once in component setup: Reset receipt cleared the signal/storage but left the former receipt visible until navigation. `Receipt` now returns a reactive render function containing the current receipt read and empty/full branch. The browser regression checks that reset immediately removes the prior receipt heading, exposes Go to cart, stores null, and stays empty after browser back and reload. Quote ownership and native quantity draft/focus behavior are unchanged.
+
 
 - Stock is a bundled fixture and is not durable across visitors.
 - Receipts are local browser records, not orders.

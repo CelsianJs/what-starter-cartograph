@@ -200,3 +200,9 @@ code { color: var(--brass); }
   .cart-line { grid-template-columns: 1fr; }
   h1 { max-width: none; }
 }
+.hero h1 { font-size: clamp(2.8rem, 5.5vw, 5rem); max-width: 15ch; line-height: .95; }
+.cart-page .page-head { display: grid; justify-content: start; gap: .6rem; margin-top: 0; }
+.cart-page .page-head h1 { max-width: 19ch; font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: .95; }
+.cart-page .page-head p:not(.eyebrow) { margin: 0; max-width: 65ch; }
+.button:disabled { opacity: .5; cursor: not-allowed; }
+.build pre { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.5; }
