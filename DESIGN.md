@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-07
+- Last refreshed: 2026-10-08
 - Primary product surfaces: Field-gear storefront, product detail pages, cart/receipt flow, build guide, serverless quote API.
 - Evidence reviewed: `what-starter-gather`, `what-starter-harbor`, `what-starter-tempo`, What router/core package docs.
 
@@ -27,17 +27,17 @@
 - Content hierarchy: Hero and product proof first, catalog filters second, cart/quote flow third, agent implementation notes isolated under `/build`.
 
 ## Design principles
-- Principle 1: Look like rugged equipment that was drawn with a grease pencil and cut from steel.
+- Principle 1: Retain field-equipment identity through the original gear artwork and restrained orange/moss palette.
 - Principle 2: Make commerce state obvious: quantity, stock, subtotal, and server validation never hide.
-- Tradeoffs: Visual grit is CSS/SVG only; no external fonts or image CDNs to keep starter cloning reliable.
+- Tradeoffs: Visual identity is CSS/SVG only; no external fonts or image CDNs to keep starter cloning reliable.
 
 ## Visual language
 - Color: Charcoal, canvas, oxidized orange, moss, worn brass.
-- Typography: Georgia for editorial field-copy paired with compact system-ui labels for utilitarian controls.
+- Typography: Local humanist sans for headings, body and controls; monospace only for code.
 - Spacing/layout rhythm: Dense inventory grids and wide ledger rows with generous route headers.
-- Shape/radius/elevation: Clipped cards, one-pixel brass rules, inset labels, strong focus outlines.
+- Shape/radius/elevation: Quiet one-pixel borders, 8px corners, consistent 44px controls and strong focus outlines.
 - Motion: Short transform/opacity route entry, hover elevation, no motion-essential interactions.
-- Imagery/iconography: Original inline SVG gear glyphs and topographic line motifs.
+- Imagery/iconography: Original inline SVG gear glyphs; no ornamental page texture or topographic rings.
 
 ## Components
 - Existing components to reuse: None directly; copy only framework patterns from earlier starters.
@@ -81,7 +81,15 @@
 ## Quote ownership and hierarchy
 - A quote applies only to its submitted sorted basket snapshot. Pending checks cannot repeat; stale responses never authorize a receipt.
 - Receipt action remains disabled until the current quote is successful. Quantity drafts stay editable while checking so changes can safely invalidate the response.
-- Home/cart heading sizing is scoped to reveal the catalog/validation workflow sooner. Clipped panels, metal/canvas colors, topographic marks and field typography stay intact.
+- Home/cart heading sizing is scoped to reveal the catalog/validation workflow sooner. Flat charcoal surfaces, orange/moss accents and original gear artwork retain the field identity.
 
 ## Open questions
 - [ ] Which real ecommerce backend should production docs recommend first / owner: platform team / impact: future integration guide.
+
+## Shared modern chrome contract
+
+- Typography: "Avenir Next", "Segoe UI Variable", "Segoe UI", sans-serif; no font downloads. Body 16px/1.6, labels and controls 14px. Monospace is limited to code and structured readouts.
+- Hierarchy: prose, build and detail headings stay within 36–44px on desktop and 28–32px on mobile. The home composition follows the same bounded hierarchy while preserving its primary art, instrument, gear or data surface.
+- Geometry: 8px spacing rhythm, restrained 8px control corners, at least 44px interactive control height, visible two-pixel focus outlines, explicit selected/disabled states.
+- Surfaces: flat theme backgrounds, solid content surfaces, subtle borders; no global decorative grids, repeating textures, heavy shadows or control pills.
+- Ownership: this is a presentation pass. Existing generation, audio, quote/receipt and server-render/cache contracts remain unchanged.
