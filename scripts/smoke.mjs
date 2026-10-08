@@ -147,14 +147,7 @@ async function assertQuantityReplacement(page) {
   const input = row.getByLabel('Basalt Frame Pack quantity');
   const handle = await input.elementHandle();
   if (!handle) throw new Error('Expected Basalt quantity input handle.');
-  await input.click();
-  await page.keyboard.press('Meta+A');
-  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
-    await page.keyboard.press('Control+A');
-  }
-  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
-    await input.click({ clickCount: 3 });
-  }
+  await selectQuantityText(page, input, handle);
   await page.keyboard.press('Backspace');
   await row.getByText('Blank edits keep the current kit line until blur.').waitFor();
   await page.getByRole('heading', { name: 'Basalt Frame Pack' }).waitFor();
@@ -168,13 +161,30 @@ async function assertQuantityReplacement(page) {
     const saved = JSON.parse(localStorage.getItem('what-starter-cartograph-v1') || '{}');
     return saved?.cart?.['basalt-frame-pack'] === 12;
   });
-  await page.keyboard.press('Meta+A');
+  await selectQuantityText(page, input, handle);
   await page.keyboard.type('2');
   await row.getByText('$496').waitFor();
+  if (!(await handle.evaluate((node) => document.activeElement === node && node.value === '2'))) {
+    throw new Error('Second quantity replacement should keep the same input focused with value 2.');
+  }
   await page.waitForFunction(() => {
     const saved = JSON.parse(localStorage.getItem('what-starter-cartograph-v1') || '{}');
     return saved?.cart?.['basalt-frame-pack'] === 2;
   });
+}
+
+async function selectQuantityText(page, input, handle) {
+  await input.click();
+  await page.keyboard.press('Meta+A');
+  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
+    await page.keyboard.press('Control+A');
+  }
+  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
+    await input.click({ clickCount: 3 });
+  }
+  if (!(await handle.evaluate((node) => node.selectionStart === 0 && node.selectionEnd === node.value.length))) {
+    throw new Error('Quantity replacement requires all text selected before typing.');
+  }
 }
 
 try {
