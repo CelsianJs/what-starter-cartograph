@@ -21,7 +21,6 @@ export default function Home() {
           </div>
         </div>
         <aside class="manifest-panel" aria-label="Basket summary">
-          <span class="map-pin"></span>
           <p class="eyebrow">Current kit</p>
           <strong>{cartCount()} items</strong>
           <span>{money(cartSubtotal())} subtotal</span>

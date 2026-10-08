@@ -23,6 +23,7 @@ async function waitForVisualRest(page) {
 
 async function assertHome(page) {
   await assertNoOverflow(page);
+  await assertModernChrome(page);
   await page.getByRole('heading', { name: /Equipment that reads like a manifest/i }).waitFor();
   await page.getByRole('heading', { name: 'Basalt Frame Pack' }).waitFor();
   await page.getByRole('heading', { name: 'Moraine Shell' }).waitFor();
@@ -60,6 +61,18 @@ async function assertNoOverflow(page) {
   const viewportWidth = page.viewportSize().width;
   const widths = await page.evaluate(() => [document.documentElement.scrollWidth, document.body.scrollWidth]);
   if (widths.some((width) => width > viewportWidth)) throw new Error(`Horizontal overflow on ${page.url()}: ${widths} / ${viewportWidth}`);
+}
+
+async function assertModernChrome(page) {
+  const styles = await page.evaluate(() => ({
+    family: getComputedStyle(document.body).fontFamily,
+    bodySize: parseFloat(getComputedStyle(document.body).fontSize),
+    background: getComputedStyle(document.body).backgroundImage,
+    heading: parseFloat(getComputedStyle(document.querySelector('h1')).fontSize),
+    targets: [...document.querySelectorAll('.brand, .button, nav a, .cart-chip, input, select')].map((node) => node.getBoundingClientRect().height),
+  }));
+  if (!/Avenir|Segoe/.test(styles.family) || styles.bodySize !== 16 || styles.background !== 'none') throw new Error(`Modern type/surface contract failed: ${JSON.stringify(styles)}`);
+  if (styles.heading > 44 || styles.targets.some((height) => height < 44)) throw new Error(`Unbounded type or undersized control: ${JSON.stringify(styles)}`);
 }
 
 async function runFlow(name, contextOptions) {

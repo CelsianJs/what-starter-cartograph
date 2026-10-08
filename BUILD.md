@@ -63,7 +63,7 @@ Visual QA note: an earlier smoke captured after a subflow and could miss a blank
 
 Regression-first tests reproduced a late quote being accepted after its basket changed. `basketKey` fingerprints sorted cart entries; `requestQuote` captures the key and submitted lines, blocks duplicate pending requests, and discards mismatched responses. `canWriteReceipt` requires the current successful quote and no pending check. Quantity blur no longer clears a quote when the canonical value is unchanged, preserving the native blank/replacement/focus behavior.
 
-Scoped home/cart heading sizing preserves the clipped field-manifest identity while bringing equipment and quote controls forward. Smooth path: use one product dataset, derive totals, validate a submitted snapshot, and test delayed responses plus real keyboard quantity replacement before introducing authoritative orders. Unit and browser smoke regressions cover the stale basket branch.
+Scoped home/cart heading sizing preserves the field-manifest identity while bringing equipment and quote controls forward. Smooth path: use one product dataset, derive totals, validate a submitted snapshot, and test delayed responses plus real keyboard quantity replacement before introducing authoritative orders. Unit and browser smoke regressions cover the stale basket branch.
 
 
 ## Known limitations
@@ -82,3 +82,7 @@ The receipt page used to read `receipt()` once in component setup: Reset receipt
 - Make server quote/order state authoritative and idempotent.
 - Integrate payments only after adding server-side ownership checks and idempotency keys.
 - Keep bounded body readers and no-store headers for mutation-like APIs.
+
+## Presentation contract
+
+The stylesheet uses local Avenir/Segoe sans fallbacks, 16px body copy, 14px labels and controls, bounded build/detail headings, and 44px controls. Code and structured readouts keep their monospace role. Theme identity comes from the real art, instrument, gear or status data rather than decorative page texture. Browser checks assert this contract alongside the existing behavior tests. Keep source/public CSS synchronized where server-rendered packaging requires it.
